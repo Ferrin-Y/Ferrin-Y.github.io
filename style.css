@@ -1,123 +1,214 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+:root {
+  --primary-bg: #000000;        /* Deep Navy Black */
+  --secondary-bg: #202d4c;      /* Dark Slate Blue */
+  --text-color: #E3E6EE;        /* Soft Off-White */
+  --accent-color: #4A90E2;      /* Subtle Blue Highlight */
+  --border-color: #161B29;      /* Muted Darker Blue */
+}
+
 /* Global Styles */
 * {
+  font-family: "Outfit", sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Roboto', sans-serif;
-  background-color: #f0f4f8;
-  color: #333;
+  background-color: var(--primary-bg);
+  color: var(--text-color);
   line-height: 1.6;
 }
 
-h1, h2, h3 {
-  font-family: 'Montserrat', sans-serif;
+/* Navbar Styling */
+.navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background-color: var(--secondary-bg);
+  color: var(--text-color);
+  padding: 15px 20px;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar .logo {
+  font-size: 1.8em;
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: var(--text-color);
+  font-size: 1.2em;
+  transition: color 0.3s ease;
+}
+
+.navbar-links a:hover {
+  color: var(--accent-color);
 }
 
 /* Hero Section */
 .hero {
   text-align: center;
-  padding: 80px 20px;
-  background-color: #007bff;
-  color: #fff;
-  border-bottom: 3px solid #0056b3;
-  animation: fadeIn 2s ease-out;
+  padding: 100px 20px;
+  background: var(--primary-bg) url(./images/banner.jpg) no-repeat center;
+  background-size: contain;
+  color: var(--text-color);
+  border-bottom: 3px solid var(--border-color);
+  animation: fadeIn 1.5s ease-in-out;
 }
 
 .title {
   font-size: 3em;
   margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp 1s ease-out forwards;
 }
 
 .subtitle {
   font-size: 1.2em;
   margin-bottom: 30px;
+  opacity: 0;
+  animation: fadeUp 1.5s ease-out forwards;
 }
 
 .button {
   padding: 12px 25px;
-  background-color: #ff6f61;
-  color: white;
+  background-color: var(--accent-color);
+  color: var(--text-color);
   text-decoration: none;
   border-radius: 5px;
   font-size: 1.1em;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  animation: fadeUp 2s ease-out forwards;
 }
 
 .button:hover {
-  background-color: #e04e41;
+  background-color: var(--border-color);
+  transform: scale(1.1);
 }
 
 /* About Section */
 .about {
   padding: 60px 20px;
-  background-color: #fff;
+  background-color: var(--secondary-bg);
+  color: var(--text-color);
   text-align: center;
 }
 
-.about h2 {
-  font-size: 2em;
-  margin-bottom: 20px;
-}
-
-.about p {
-  font-size: 1.1em;
-  color: #666;
-  max-width: 800px;
-  margin: 0 auto;
-  line-height: 1.8;
-}
-
 /* Projects Section */
-.projects {
-  padding: 60px 20px;
-  background-color: #f8f9fa;
-}
-
 .projects h2 {
   text-align: center;
   font-size: 2.5em;
   margin-bottom: 40px;
+  color: var(--accent-color);
 }
-
 .project-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
   gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap; /* Ensures responsiveness */
 }
 
 .project-card {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  padding: 20px;
+  position: relative;
+  background-color: var(--secondary-bg);
+  width: 300px;
+  height: 180px;
+  border-radius: 10px;
   text-align: center;
-  border-radius: 8px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.project-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden; /* Ensures no content spills out */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  cursor: pointer;
 }
 
 .project-card h3 {
-  font-size: 1.6em;
-  margin-bottom: 10px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-color);
+  font-size: 1.4em;
+  transition: opacity 0.3s ease-in-out;
 }
 
-.project-card p {
-  font-size: 1.1em;
-  color: #666;
+/* Hidden Description Box */
+.project-card .project-description {
+  position: absolute;
+  bottom: -50px; /* Starts hidden */
+  left: 0;
+  width: 100%;
+  background: rgba(10, 15, 31, 0.95); /* Semi-transparent Deep Navy */
+  color: var(--text-color);
+  padding: 10px;
+  font-size: 0.9em;
+  text-align: center;
+  transition: bottom 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  opacity: 0;
 }
 
-/* Keyframes for Animations */
+/* Hover Effect */
+.project-card:hover {
+  transform: translateY(-5px); /* Slight Lift */
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4); /* Deeper Shadow */
+}
+
+.project-card:hover .project-description {
+  bottom: 0px; /* Moves up to be visible */
+  opacity: 1;
+}
+
+.project-card:hover h3 {
+  opacity: 0.7; /* Slight fade of title for effect */
+}
+
+
+/* CSS Animations */
 @keyframes fadeIn {
-  0% {
+  from {
     opacity: 0;
   }
-  100% {
+  to {
     opacity: 1;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
