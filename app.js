@@ -7,8 +7,9 @@ function Navbar() {
         <ul className="navbar-links">
           <li><a href="#about">About</a></li>
           <li><a href="#projects">Projects</a></li>
+          <li><a href="#contact">Contact</a></li>
         </ul>
-      </div>
+      </div>  
     </nav>
   );
 }
@@ -45,9 +46,9 @@ function Projects() {
       <h2>My Projects</h2>
       <div className="project-list">
         <div className="project-card">
-          <h3>Task Manager</h3>
+          <h3>MoInfo - Study Group App</h3>
           <div className="project-description">
-            A web app for organizing tasks, built with HTML, CSS, and JavaScript.
+            A web application to create and find study groups based on course codes.
           </div>
         </div>
 
@@ -66,8 +67,40 @@ function Projects() {
         </div>
       </div>
     </section>
+    
   );
 }
+
+function Footer() {
+  return (
+    <footer className="footer">
+      <div className="footer-container">
+        {/* Copyright Info */}
+        <p>© 2025 Ferrin Yesudasan</p>
+
+
+
+        {/* Quick Navigation Links */}
+        <ul className="footer-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#projects">Projects</a></li>
+        </ul>
+
+        {/* Social Media Links */}
+        <div className="footer-links" id="contact">
+          <a href="https://www.linkedin.com/in/ferrin-yesudasan" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://github.com/Ferrin-Y" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="mailto:ferrin.yesudasan@mohawkcollege.ca">Email</a>
+        </div>
+
+          {/* Tech Stack Mention */}
+          <p className="tech-stack">Built with React</p>
+      </div>
+    </footer>
+  );
+}
+
+
 
 
 // Main App Component that combines everything
@@ -78,9 +111,13 @@ function App() {
       <Hero />
       <About />
       <Projects />
+      <Footer/>
     </>
   );
 }
+
+
+
 
 // React 18 Rendering
 const root = ReactDOM.createRoot(document.getElementById("root"));
