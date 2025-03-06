@@ -1,3 +1,6 @@
+const { useState } = window.React;
+const ReactDOM = window.ReactDOM;
+
 // Navbar Component
 function Navbar() {
   return (
@@ -14,7 +17,7 @@ function Navbar() {
   );
 }
 
-// Hero Component with CSS Animations
+// Hero Section
 function Hero() {
   return (
     <section className="hero" id="hero">
@@ -27,7 +30,7 @@ function Hero() {
   );
 }
 
-// About Component
+// About Section
 function About() {
   return (
     <section className="about" id="about">
@@ -39,71 +42,67 @@ function About() {
   );
 }
 
-// Projects Component with CSS Animations
+// Projects Section
 function Projects() {
+  const projects = [
+    {
+      title: "Space Shooter Game",
+      description: "A space-shooter game made using JavaScript and SVG.",
+      url: "https://ferrin-y.github.io/Space-Shooter/",
+    },
+    {
+      title: "Color Matching Game",
+      description: "A fun game built with HTML, CSS, and JavaScript.",
+      url: "https://ferrin-y.github.io/Color-Match/",
+    }
+  ];
+
   return (
     <section className="projects" id="projects">
       <h2>My Projects</h2>
       <div className="project-list">
-        <div className="project-card">
-          <h3>MoInfo - Study Group App</h3>
-          <div className="project-description">
-            A web application to create and find study groups based on course codes.
-          </div>
-        </div>
-
-        <div className="project-card">
-          <h3>3D Runner Game</h3>
-          <div className="project-description">
-            A Unity-based endless runner game with custom 3D models.
-          </div>
-        </div>
-
-        <div className="project-card">
-          <h3>Color Matching Game</h3>
-          <div className="project-description">
-            A fast-paced color-matching game built using JavaScript and SVG.
-          </div>
-        </div>
+        {projects.map((project, index) => (
+          <a
+            key={index}
+            className="project-card"
+            href={project.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <h3>{project.title}</h3>
+            <div className="project-description">{project.description}</div>
+          </a>
+        ))}
       </div>
     </section>
-    
   );
 }
 
+// Footer Section
 function Footer() {
   return (
     <footer className="footer">
       <div className="footer-container">
-        {/* Copyright Info */}
         <p>© 2025 Ferrin Yesudasan</p>
 
-
-
-        {/* Quick Navigation Links */}
         <ul className="footer-links">
           <li><a href="#about">About</a></li>
           <li><a href="#projects">Projects</a></li>
         </ul>
 
-        {/* Social Media Links */}
         <div className="footer-links" id="contact">
           <a href="https://www.linkedin.com/in/ferrin-yesudasan" target="_blank" rel="noopener noreferrer">LinkedIn</a>
           <a href="https://github.com/Ferrin-Y" target="_blank" rel="noopener noreferrer">GitHub</a>
           <a href="mailto:ferrin.yesudasan@mohawkcollege.ca">Email</a>
         </div>
 
-          {/* Tech Stack Mention */}
-          <p className="tech-stack">Built with React</p>
+        <p className="tech-stack">Built with React</p>
       </div>
     </footer>
   );
 }
 
-
-
-
-// Main App Component that combines everything
+// Main App Component
 function App() {
   return (
     <>
@@ -111,14 +110,11 @@ function App() {
       <Hero />
       <About />
       <Projects />
-      <Footer/>
+      <Footer />
     </>
   );
 }
 
 
-
-
-// React 18 Rendering
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);

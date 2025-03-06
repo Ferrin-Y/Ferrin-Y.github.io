@@ -197,7 +197,7 @@ body {
   background: radial-gradient(rgb(255, 255, 255), rgb(155, 155, 155));
   background-blend-mode: multiply;
   background-color: var(--secondary-bg);
-  backdrop-filter: blur(30rem);
+  backdrop-filter: blur(20px); /* Smooth blur effect */
 }
 
 .project-card:hover .project-description {
@@ -209,7 +209,6 @@ body {
   opacity: 0.7;
 }
 
-/* Footer Styles */
 /* Footer Styles */
 .footer {
   background-color: var(--secondary-bg);
@@ -307,4 +306,3 @@ body {
     transform: scale(1);
   }
 }
-
