@@ -50,11 +50,18 @@ body {
 .navbar .logo {
   font-family: "Lilita One", sans-serif;
   font-size: 1.8em;
-  font-weight: bolder;
   color: var(--text-color);
   text-shadow: 0 0 10px var(--border-color);
   text-decoration: none;
+  display: flex;
+  align-items: center; /* Align logo with the name */
 }
+
+.navbar .logo i {
+  margin: 10px; /* Space between name and logo */
+  font-size: 1.2em; /* Adjust logo size */
+}
+
 
 .navbar-links {
   list-style: none;
@@ -121,7 +128,8 @@ body {
 
 
 .about {
-  padding: 80px 20px;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  padding: 120px 30px;
   background-color: var(--secondary-bg);
   color: var(--text-color);
   text-align: center;
@@ -132,7 +140,7 @@ body {
 /* Projects Section */
 .projects {
   padding: 100px 20px; /* Increased padding */
-  background-color: var(--primary-bg);
+  /* background-color: var(--primary-bg); */
   margin-top: 0; /* Remove extra margin */
 }
 
@@ -153,14 +161,40 @@ body {
 .project-card {
   position: relative;
   background-color: var(--secondary-bg);
-  width: 320px; /* Increased width for spacing */
-  height: 220px; /* Adjusted height */
-  border-radius: 12px; /* Slightly rounded corners */
+  width: 320px;
+  height: 220px;
+  border-radius: 12px;
   text-align: center;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
   transition: 300ms ease-in-out;
   cursor: pointer;
   margin: 20px;
+  overflow: hidden;
+}
+
+/* The pseudo-element for the glass blur effect */
+.project-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0));
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  border-radius: inherit;
+  border:1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  opacity: 0;
+  transition: 300ms ease-in-out;
+  z-index: 1;
+}
+
+
+/* Show the blur effect when hovering */
+.project-card:hover::before {
+  opacity: 1;
 }
 
 .project-card h3 {
@@ -181,24 +215,32 @@ body {
   width: 100%;
   background: rgba(10, 15, 31, 0.64);
   color: var(--text-color);
-  padding: 12px;
+  padding: 10px;
   font-size: 0.95em;
   text-align: center;
   transition: background-color 500ms ease-in-out;
   transition: bottom 0.3s ease-in-out, opacity 0.3s ease-in-out;
   opacity: 0;
-  border-radius: inherit;
+  border-radius: 0 0 12px 12px;
+}
+
+.project-description{
+  z-index: 2;
+  pointer-events: none; 
 }
 
 /* Adjustments for hover effects */
 .project-card:hover {
+  text-shadow: 0 0 5px black;
   transform: translateY(-8px);
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.4);
-  background: radial-gradient(rgb(255, 255, 255), rgb(155, 155, 155));
-  background-blend-mode: multiply;
+  /* background: radial-gradient(rgb(255, 255, 255), rgb(155, 155, 155));
+  background-blend-mode:multiply; */
   background-color: var(--secondary-bg);
-  backdrop-filter: blur(20px); /* Smooth blur effect */
+  backdrop-filter: blur(20px); /* Smooth blur effect */ 
+  overflow: visible;
 }
+
 
 .project-card:hover .project-description {
   bottom: 0;

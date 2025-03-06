@@ -1,12 +1,13 @@
 const { useState } = window.React;
 const ReactDOM = window.ReactDOM;
 
-// Navbar Component
 function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <a href="#hero" className="logo">Ferrin</a>
+        <a href="https://github.com/Ferrin-Y" className="logo">
+        <i className="fab fa-github"></i>Ferrin-Y  {/* GitHub logo */}
+        </a>
         <ul className="navbar-links">
           <li><a href="#about">About</a></li>
           <li><a href="#projects">Projects</a></li>
@@ -16,6 +17,7 @@ function Navbar() {
     </nav>
   );
 }
+
 
 // Hero Section
 function Hero() {
@@ -54,6 +56,11 @@ function Projects() {
       title: "Color Matching Game",
       description: "A fun game built with HTML, CSS, and JavaScript.",
       url: "https://ferrin-y.github.io/Color-Match/",
+    },    
+    {
+      title: "MoInfo Study Group App",
+      description: "A web app to help students create and find study groups.",
+      url: "https://github.com/Musa-Kal/MoInfo",
     }
   ];
 
