@@ -51,16 +51,25 @@ function Projects() {
       title: "Space Shooter Game",
       description: "A space-shooter game made using JavaScript and SVG.",
       url: "https://ferrin-y.github.io/Space-Shooter/",
+      image: "images/screenshots/space-shooter.png"
     },
     {
       title: "Color Matching Game",
       description: "A fun game built with HTML, CSS, and JavaScript.",
       url: "https://ferrin-y.github.io/Color-Match/",
+      image: "images/screenshots/color-matcher.png"
     },    
     {
       title: "MoInfo Study Group App",
       description: "A web app to help students create and find study groups.",
       url: "https://github.com/Musa-Kal/MoInfo",
+      image: "images/screenshots/mo-info.png"
+    },
+    {
+      title: "Mooove - 3D Runner Game",
+      description: "A Unity-based endless rolling game, hosted on simmer.io",
+      url: "https://www.simmer.io/@Ferrin/mooove",
+      image: "images/screenshots/mooove.png"
     }
   ];
 
@@ -75,6 +84,7 @@ function Projects() {
             href={project.url}
             target="_blank"
             rel="noopener noreferrer"
+            style={{ "--bg-image": `url(${project.image})` }}
           >
             <h3>{project.title}</h3>
             <div className="project-description">{project.description}</div>

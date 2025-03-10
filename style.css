@@ -139,9 +139,9 @@ body {
 
 /* Projects Section */
 .projects {
-  padding: 100px 20px; /* Increased padding */
-  /* background-color: var(--primary-bg); */
-  margin-top: 0; /* Remove extra margin */
+  padding: 100px 20px;
+  background-color: var(--primary-bg);
+  margin-top: 0;
 }
 
 .projects h2 {
@@ -155,24 +155,25 @@ body {
   display: flex;
   gap: 20px;
   justify-content: center;
-  flex-wrap: wrap; /* Ensures responsiveness */
+  flex-wrap: wrap;
 }
 
+/* Project Card */
 .project-card {
   position: relative;
-  background-color: var(--secondary-bg);
+  background-color: var(--secondary-bg); /* Default solid color */
   width: 320px;
   height: 220px;
   border-radius: 12px;
   text-align: center;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-  transition: 300ms ease-in-out;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   cursor: pointer;
   margin: 20px;
   overflow: hidden;
 }
 
-/* The pseudo-element for the glass blur effect */
+/* Background Image (Hidden Initially) */
 .project-card::before {
   content: "";
   position: absolute;
@@ -180,23 +181,29 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0));
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(1px);
-  border-radius: inherit;
-  border:1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  opacity: 0;
-  transition: 300ms ease-in-out;
-  z-index: 1;
+  background-image: var(--bg-image); /* Set via React */
+  background-color: black;
+  background-size: cover; /* Ensures full coverage */
+  /* background-repeat: no-repeat; */
+  background-position: center;
+  opacity: 0; /* Initially hidden */
+  transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
 }
 
+/* Scale Card & Show Image on Hover */
+.project-card:hover {
+  text-shadow:0 0 5px #000000;
+  transform: scale(1.3) ; /* Scales up the card */
+  box-shadow: 0px 12px 35px rgba(0, 0, 0, 0.5);
+  z-index: 8;
+}
 
-/* Show the blur effect when hovering */
 .project-card:hover::before {
   opacity: 1;
+  transform: scale(1); /* Ensures the image fits properly */
 }
 
+/* Project Title */
 .project-card h3 {
   position: absolute;
   top: 50%;
@@ -205,12 +212,13 @@ body {
   color: var(--text-color);
   font-size: 1.5em;
   transition: opacity 0.3s ease-in-out;
-  margin-top: 10px;
+  z-index: 2;
 }
 
+/* Description Panel */
 .project-card .project-description {
   position: absolute;
-  bottom: -60px; /* Adjusted for spacing */
+  bottom: -60px;
   left: 0;
   width: 100%;
   background: rgba(10, 15, 31, 0.64);
@@ -218,38 +226,24 @@ body {
   padding: 10px;
   font-size: 0.95em;
   text-align: center;
-  transition: background-color 500ms ease-in-out;
   transition: bottom 0.3s ease-in-out, opacity 0.3s ease-in-out;
   opacity: 0;
   border-radius: 0 0 12px 12px;
-}
-
-.project-description{
   z-index: 2;
-  pointer-events: none; 
 }
 
-/* Adjustments for hover effects */
-.project-card:hover {
-  text-shadow: 0 0 5px black;
-  transform: translateY(-8px);
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.4);
-  /* background: radial-gradient(rgb(255, 255, 255), rgb(155, 155, 155));
-  background-blend-mode:multiply; */
-  background-color: var(--secondary-bg);
-  backdrop-filter: blur(20px); /* Smooth blur effect */ 
-  overflow: visible;
-}
-
-
+/* Show Description on Hover */
 .project-card:hover .project-description {
   bottom: 0;
   opacity: 1;
 }
 
+/* Fade Out Title on Hover */
 .project-card:hover h3 {
   opacity: 0.7;
 }
+
+
 
 /* Footer Styles */
 .footer {
