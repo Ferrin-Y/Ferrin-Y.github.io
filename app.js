@@ -181,7 +181,7 @@ function Navbar() {
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
-        <a href="#hero" className="logo">
+        <a href="https://github.com/Ferrin-Y" target="_blank" rel="noopener noreferrer" className="logo">
           <i className="fab fa-github"></i>Ferrin-Y
         </a>
         
@@ -340,7 +340,7 @@ function Projects() {
       description: "A fun and addictive game built with HTML, CSS, and JavaScript that tests your color recognition skills.",
       url: "https://ferrin-y.github.io/Color-Match/",
       image: "images/screenshots/color-matcher.png",
-      tags: ["HTML", "CSS", "JavaScript"]
+      tags: ["HTML", "CSS", "JavaScript", "SVG"]
     },    
     {
       title: "MoInfo Study Group App",
@@ -351,8 +351,8 @@ function Projects() {
     },
     {
       title: "Mooove - 3D Runner Game",
-      description: "A Unity-based endless rolling game with dynamic obstacles and scoring system, hosted on simmer.io.",
-      url: "https://www.simmer.io/@ferrin/mooove",
+      description: "A Unity-based endless rolling game with dynamic obstacles and scoring system, hosted on itch.io.",
+      url: "https://ferrin-y.itch.io/mooove",
       image: "images/screenshots/mooove.png",
       tags: ["Unity", "C#", "Blender3D"]
     }
@@ -433,16 +433,17 @@ function Footer() {
             <li><a href="#hero"><i className="fas fa-home"></i> Home</a></li>
             <li><a href="#about"><i className="fas fa-user"></i> About</a></li>
             <li><a href="#projects"><i className="fas fa-code"></i> Projects</a></li>
-            <li><a href="#contact"><i className="fas fa-envelope"></i> Contact</a></li>
+            <li><a href="#contact"><i className="fas fa-address-book"></i> Contact</a></li>
           </ul>
         </div>
         
         <div className="footer-col">
           <h3>Contact Info</h3>
           <div className="contact-info">
-            <p><i className="fas fa-envelope"></i> ferrin.yesudasan@mohawkcollege.ca</p>
+            <p><a href="mailto:ferrin.yesudasan@gmail.com"><i className="fas fa-envelope"></i> ferrin.yesudasan@gmail.com</a></p>
+            <p><a href="https://www.linkedin.com/in/ferrin-yesudasan" target="_blank" rel="noopener noreferrer"><i className="fab fa-linkedin"></i>Linkedin/Ferrin-Yesudasan</a></p>
+            <p><a href="https://github.com/Ferrin-Y"><i className="fab fa-github"></i> github.com/Ferrin-Y</a></p>
             <p><i className="fas fa-map-marker-alt"></i>Hamilton, Ontario, Canada</p>
-            <p><i className="fas fa-globe"></i> github.com/Ferrin-Y</p>
           </div>
         </div>
       </div>

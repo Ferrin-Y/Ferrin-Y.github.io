@@ -236,6 +236,8 @@ body {
   position: relative;
   display: inline-block;
   min-height: 1.2em; /* Ensures minimum height even when empty */
+  overflow: hidden; /* Prevent content overflow */
+  white-space: nowrap; 
 }
 
 .title-content {
@@ -258,12 +260,34 @@ body {
   white-space: nowrap;
   animation: typing 4s steps(30) infinite;
 }
+
 @keyframes typing {
   0%, 90%, 100% {
     width: 0;
   }
   30%, 60% {
     width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 3em !important; /* Slightly reduced font size */
+    white-space:nowrap; /* Ensure text stays on one line */
+    max-width: 100%; /* Limit width to prevent overflow */
+    overflow: hidden; 
+  }
+  
+  .title::before {
+    overflow: hidden; 
+    white-space:nowrap; /* Ensure animation stays on one line */
+    max-width: 100%; 
+  }
+}
+
+@media (max-width: 532px) {
+  .title {
+    font-size: 8vw !important;
   }
 }
 
@@ -658,7 +682,7 @@ body {
   gap: 15px;
 }
 
-.footer-links a {
+.footer-links a, .contact-info a{
   text-decoration: none;
   color: var(--text-color);
   transition: color 0.3s ease, transform 0.3s ease;
@@ -668,19 +692,19 @@ body {
   gap: 10px;
 }
 
-.footer-links a i {
+.footer-links a i, .contact-info a i{
   font-size: 1.2em;
   color: var(--accent-color);
   transition: transform 0.3s ease;
 }
 
-.footer-links a:hover {
+.footer-links a:hover, .contact-info a:hover {
   color: var(--accent-glow);
   opacity: 1;
   transform: translateX(5px);
 }
 
-.footer-links a:hover i {
+.footer-links a:hover i, .contact-info a:hover i  {
   transform: scale(1.2);
 }
 
