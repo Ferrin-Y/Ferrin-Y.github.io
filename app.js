@@ -270,6 +270,30 @@ function About() {
     triggerOnce: true
   });
 
+  const skills = [
+  "JavaScript",
+  "TypeScript",
+  "React",
+  "Angular",
+  "HTML5/CSS3",
+  "Next.js",
+  "Node.js",
+  "Java",
+  "Spring Boot",
+  "C#",
+  "PHP",
+  "ASP.Net",
+  "RestAPI",
+  "JavaFX",
+  "SQL",
+  "Unity",
+  "Git",
+  "Hibernate ORM",
+  "Responsive Design",
+  "Quality Assurance",
+  "Software Testing",
+];
+
   return (
     <section className="about" id="about">
       <div className="about-container">
@@ -303,20 +327,11 @@ function About() {
             </p>
             
             <div className="skill-list">
-              <span className="skill-badge">JavaScript</span>
-              <span className="skill-badge">TypeScript</span>
-              <span className="skill-badge">React</span>
-              <span className="skill-badge">HTML5/CSS3</span>
-              <span className="skill-badge">Next.js</span>
-              <span className="skill-badge">Java</span>
-              <span className="skill-badge">C#</span>
-              <span className="skill-badge">Unity</span>
-              <span className="skill-badge">Git</span>
-              <span className="skill-badge">Responsive Design</span>
-              <span className="skill-badge">PHP</span>
-              <span className="skill-badge">SQL</span>
-              <span className="skill-badge">Quality Assurance</span>
-              <span className="skill-badge">Software Testing</span>
+              {skills.map((skill, index) => (
+              <span key={index} className="skill-badge">
+              {skill}
+              </span>
+              ))}
             </div>
           </div>
         </div>
@@ -340,7 +355,7 @@ function Projects() {
       description: "A fun and addictive game built with HTML, CSS, and JavaScript that tests your color recognition skills.",
       url: "https://ferrin-y.github.io/Color-Match/",
       image: "images/screenshots/color-matcher.png",
-      tags: ["HTML", "CSS", "JavaScript", "SVG"]
+      tags: ["HTML", "JavaScript", "SVG"]
     },    
     {
       title: "MoInfo Study Group App",
@@ -355,6 +370,13 @@ function Projects() {
       url: "https://ferrin-y.itch.io/mooove",
       image: "images/screenshots/mooove.png",
       tags: ["Unity", "C#", "Blender3D"]
+    },
+    {
+      title: "CookApp - Recipe Suggestion App",
+      description: "A Java based application that helps users discover, favorite recipes based on ingredients, dietary preferences, and cuisine",
+      url: "https://github.com/Ferrin-Y/CookApp",
+      image: "images/screenshots/cookApp.png",
+      tags: ["Java", "JavaFX", "MySQL", "Hibernate"]
     }
   ];
 
