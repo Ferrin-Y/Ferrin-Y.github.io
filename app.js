@@ -641,6 +641,13 @@ function Projects() {
       url: "https://github.com/Ferrin-Y/CookApp",
       image: "images/screenshots/cookApp.png",
       tags: ["Java", "JavaFX", "MySQL", "Hibernate"]
+    },
+    {
+      title: "Book Discovery Expo App",
+      description: "A React Native mobile application that allows users to search, browse, and save their favorite books using the Google Books API",
+      url: "https://github.com/Ferrin-Y/google-books-app",
+      image: "images/screenshots/google-books.png", 
+      tags: ["React Native", "Expo", "Google Books API"]
     }
   ];
 
