@@ -36,6 +36,28 @@ body {
   min-height: 100vh;
 }
 
+::selection {
+  background: rgba(var(--accent-glow), 0.35);
+  color: rgb(var(--text-color));
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--primary-bg));
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgb(var(--gradient-start)), rgb(var(--gradient-end)));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--accent-glow));
+}
+
 /* Custom Cursor */
 
 #cursor {
@@ -75,18 +97,21 @@ body {
   position: fixed;
   top: 0;
   width: 100%;
-  background-color: rgba(var(--secondary-bg),0.6);
-  backdrop-filter: blur(10px);
+  background-color: rgba(var(--secondary-bg),0.55);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-bottom: 1px solid rgba(var(--accent-glow), 0.08);
   color: rgb(var(--text-color));
   padding: 15px 30px;
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: padding 0.3s ease, background-color 0.3s ease;
+  transition: padding 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .navbar.scrolled {
   padding: 10px 30px;
-  background-color: rgba(var(--secondary-bg),.95);
+  background-color: rgba(var(--secondary-bg),.85);
+  border-bottom-color: rgba(var(--accent-glow), 0.15);
 }
 
 .navbar-container {
@@ -705,9 +730,14 @@ body {
   z-index: 2;
 }
 
+.project-card {
+  border: 1px solid rgba(var(--accent-glow), 0.1);
+}
+
 .project-card:hover {
   transform: translateY(-15px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 35px rgba(var(--accent-glow), 0.2);
+  border-color: rgba(var(--accent-glow), 0.3);
 }
 
 .project-card:hover::before {
@@ -777,6 +807,38 @@ body {
   font-size: 0.8em;
   color: rgb(var(--accent-glow));
   white-space: nowrap;
+}
+
+.project-glyph {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4.5em;
+  color: rgba(var(--text-color), 0.1);
+  z-index: 1;
+  pointer-events: none;
+  transition: transform 0.5s ease, color 0.5s ease;
+}
+
+.project-card:hover .project-glyph {
+  transform: translate(-50%, -50%) scale(1.1);
+  color: rgba(var(--text-color), 0.16);
+}
+
+.project-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 4;
+  padding: 5px 13px;
+  border-radius: 50px;
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  background: linear-gradient(90deg, rgb(var(--gradient-start)), rgb(var(--gradient-end)));
+  color: white;
+  box-shadow: 0 4px 14px rgba(var(--accent-glow), 0.45);
 }
 
 /* Footer Styles */

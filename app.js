@@ -608,6 +608,33 @@ function About() {
 function Projects() {
   const projects = [
     {
+      title: "Conduit - Async RAG Pipeline",
+      description: "A high-performance, asynchronous document ingestion and semantic search engine. FastAPI accepts documents instantly while a background worker pool handles chunking, embedding, and indexing for retrieval.",
+      url: "https://github.com/Ferrin-Y/Conduit",
+      icon: "fa-diagram-project",
+      gradient: "linear-gradient(135deg, rgba(118,94,222,0.55), rgba(42,20,86,0.85))",
+      tags: ["Python", "FastAPI", "PostgreSQL", "ChromaDB", "Docker"],
+      badge: "New"
+    },
+    {
+      title: "Glean - AI Bookmark Manager",
+      description: "An AI-powered bookmark manager that auto-tags, summarizes, and organizes saved links, with full-text search and collections built on Next.js and Supabase.",
+      url: "https://github.com/Ferrin-Y/glean",
+      icon: "fa-bookmark",
+      gradient: "linear-gradient(135deg, rgba(79,60,166,0.6), rgba(19,19,47,0.9))",
+      tags: ["Next.js", "TypeScript", "Supabase", "Tailwind CSS"],
+      badge: "New"
+    },
+    {
+      title: "Arboris - Dependency Graph CLI",
+      description: "A fast command-line tool that parses source with tree-sitter and maps what imports what across large repos, exporting the result as Markdown, Mermaid, Graphviz, or an interactive terminal explorer.",
+      url: "https://github.com/Ferrin-Y/Arboris",
+      icon: "fa-sitemap",
+      gradient: "linear-gradient(135deg, rgba(118,94,222,0.5), rgba(19,19,47,0.9))",
+      tags: ["Python", "Rust", "tree-sitter", "CLI"],
+      badge: "New"
+    },
+    {
       title: "Space Shooter Game",
       description: "A space-shooter game made using JavaScript and SVG with smooth animations and interactive controls.",
       url: "https://ferrin-y.github.io/Space-Shooter/",
@@ -678,11 +705,15 @@ function Projects() {
               href={project.url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ 
-                "--bg-image": `url(${project.image})`,
-                transitionDelay: `${index * 0.1}s` 
+              style={{
+                "--bg-image": project.image ? `url(${project.image})` : project.gradient,
+                transitionDelay: `${index * 0.1}s`
               }}
             >
+              {project.badge && <span className="project-badge">{project.badge}</span>}
+              {!project.image && project.icon && (
+                <i className={`fas ${project.icon} project-glyph`}></i>
+              )}
               <div className="project-content">
                 <h3>{project.title}</h3>
                 <div className="project-description">{project.description}</div>
