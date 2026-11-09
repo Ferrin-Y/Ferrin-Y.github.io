@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#0D1117"/>
+  <path d="M208 160 V120 M256 160 V120 M304 160 V120 M208 352 V392 M256 352 V392 M304 352 V392 M160 208 H120 M160 256 H120 M160 304 H120 M352 208 H392 M352 256 H392 M352 304 H392" stroke="#8B7CFF" stroke-width="16" stroke-linecap="round"/>
+  <rect x="160" y="160" width="192" height="192" rx="28" fill="none" stroke="#8B7CFF" stroke-width="16"/>
+  <text x="256" y="292" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="104" font-weight="700" fill="#E6EDF3">fy</text>
+</svg>

@@ -24,172 +24,220 @@ function useIntersectionObserver(options = {}) {
   return [ref, isIntersecting];
 }
 
-// Particle Background Component
-// Enhanced Particle Background Component
-function ParticleBackground() {
+// Hero backdrop: a quiet glow + grain instead of an animated particle field
+function HeroBackdrop() {
+  return (
+    <>
+      <div className="hero-glow"></div>
+      <div className="hero-grid"></div>
+      <div className="hero-grain"></div>
+    </>
+  );
+}
+
+// Hero scene: a slow-turning wireframe icosahedron behind the terminal panel.
+// Skipped on touch/narrow screens and under reduced motion to keep things light.
+function HeroScene() {
+  const containerRef = useRef(null);
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    const skip =
+      !window.THREE ||
+      window.matchMedia('(max-width: 899px)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (skip) return;
+
+    const THREE = window.THREE;
+    const container = containerRef.current;
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    let animationId;
-    
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    camera.position.set(0, 0, 7.2);
+
+    const accent = new THREE.Color(0x8274f0);
+
+    const core = new THREE.LineSegments(
+      new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(2.2, 1)),
+      new THREE.LineBasicMaterial({ color: accent, transparent: true, opacity: 0.6 })
+    );
+    const halo = new THREE.LineSegments(
+      new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(2.3, 1)),
+      new THREE.LineBasicMaterial({ color: accent, transparent: true, opacity: 0.16 })
+    );
+    const vertices = new THREE.Points(
+      new THREE.IcosahedronGeometry(2.2, 1),
+      new THREE.PointsMaterial({ color: 0xffffff, size: 0.045, transparent: true, opacity: 0.75 })
+    );
+    scene.add(core, halo, vertices);
+
+    let frame = null;
+    let targetX = 0, targetY = 0;
+
+    const onMove = (e) => {
+      targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+      targetY = (e.clientY / window.innerHeight - 0.5) * 2;
     };
-    
-    resizeCanvas();
+    window.addEventListener('mousemove', onMove);
 
-    const particles = [];
-    const particleCount = Math.min(Math.floor(window.innerWidth / 15), 80);
+    const resize = () => {
+      const w = container.clientWidth || 1;
+      const h = container.clientHeight || 1;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    };
+    resize();
+    window.addEventListener('resize', resize);
 
-    // Create particles with better visibility
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 3 + 1.5, // Larger particles
-        color: `rgba(118, 94, 222, ${Math.random() * 0.6 + 0.3})`, // Higher opacity
-        glowColor: `rgba(156, 138, 247, ${Math.random() * 0.4 + 0.2})`, // Glow effect
-        velocity: {
-          x: (Math.random() - 0.5) * 0.8,
-          y: (Math.random() - 0.5) * 0.8
-        },
-        pulse: Math.random() * Math.PI * 2 // For pulsing effect
-      });
-    }
+    const clock = new THREE.Clock();
+    const render = () => {
+      const t = clock.getElapsedTime();
+      core.rotation.y = t * 0.14;
+      core.rotation.x = Math.sin(t * 0.2) * 0.2;
+      halo.rotation.copy(core.rotation);
+      vertices.rotation.copy(core.rotation);
 
-    function connect() {
-      const maxDistance = 120;
-      for (let a = 0; a < particles.length; a++) {
-        for (let b = a + 1; b < particles.length; b++) {
-          const dx = particles[a].x - particles[b].x;
-          const dy = particles[a].y - particles[b].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          if (distance < maxDistance) {
-            const opacity = 0.4 * (1 - distance / maxDistance);
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(118, 94, 222, ${opacity})`;
-            ctx.lineWidth = 1;
-            ctx.moveTo(particles[a].x, particles[a].y);
-            ctx.lineTo(particles[b].x, particles[b].y);
-            ctx.stroke();
-          }
-        }
+      camera.position.x += (targetX * 0.7 - camera.position.x) * 0.045;
+      camera.position.y += (-targetY * 0.5 - camera.position.y) * 0.045;
+      camera.lookAt(0, 0, 0);
+
+      renderer.render(scene, camera);
+      frame = requestAnimationFrame(render);
+    };
+
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && frame === null) {
+        render();
+      } else if (!entry.isIntersecting && frame !== null) {
+        cancelAnimationFrame(frame);
+        frame = null;
       }
-    }
-
-    function animate() {
-      animationId = requestAnimationFrame(animate);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      particles.forEach(particle => {
-        // Update position
-        particle.x += particle.velocity.x;
-        particle.y += particle.velocity.y;
-        
-        // Bounce off edges
-        if (particle.x < 0 || particle.x > canvas.width) {
-          particle.velocity.x = -particle.velocity.x;
-          particle.x = Math.max(0, Math.min(canvas.width, particle.x));
-        }
-        
-        if (particle.y < 0 || particle.y > canvas.height) {
-          particle.velocity.y = -particle.velocity.y;
-          particle.y = Math.max(0, Math.min(canvas.height, particle.y));
-        }
-        
-        // Update pulse for glow effect
-        particle.pulse += 0.02;
-        const pulseIntensity = Math.sin(particle.pulse) * 0.3 + 0.7;
-        
-        // Draw particle with glow
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-        
-        // Create glow effect
-        const gradient = ctx.createRadialGradient(
-          particle.x, particle.y, 0,
-          particle.x, particle.y, particle.radius * 3
-        );
-        gradient.addColorStop(0, particle.color);
-        gradient.addColorStop(0.5, particle.glowColor);
-        gradient.addColorStop(1, 'transparent');
-        
-        ctx.fillStyle = gradient;
-        ctx.fill();
-        
-        // Draw solid center
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.radius * 0.6, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(156, 138, 247, ${pulseIntensity})`;
-        ctx.fill();
-      });
-      
-      connect();
-    }
-
-    animate();
-
-    const handleResize = () => {
-      resizeCanvas();
-      // Reposition particles that are now outside the canvas
-      particles.forEach(particle => {
-        if (particle.x > canvas.width) particle.x = canvas.width;
-        if (particle.y > canvas.height) particle.y = canvas.height;
-      });
-    };
-
-    window.addEventListener('resize', handleResize);
+    }, { threshold: 0.05 });
+    io.observe(container);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
+      io.disconnect();
+      if (frame !== null) cancelAnimationFrame(frame);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('resize', resize);
+      renderer.dispose();
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="bg-particles"></canvas>;
+  return (
+    <div className="hero-scene" ref={containerRef} aria-hidden="true">
+      <canvas ref={canvasRef}></canvas>
+    </div>
+  );
+}
+
+// Magnetic hover: nudges buttons/icons toward the cursor, eases back on leave
+function useMagnetic(selector, strength = 0.3) {
+  useEffect(() => {
+    if (!window.gsap || window.matchMedia('(pointer: coarse)').matches) return;
+    const gsap = window.gsap;
+    const els = Array.from(document.querySelectorAll(selector));
+
+    const cleanups = els.map((el) => {
+      const xTo = gsap.quickTo(el, 'x', { duration: 0.45, ease: 'power3' });
+      const yTo = gsap.quickTo(el, 'y', { duration: 0.45, ease: 'power3' });
+
+      const onMove = (e) => {
+        const r = el.getBoundingClientRect();
+        xTo((e.clientX - r.left - r.width / 2) * strength);
+        yTo((e.clientY - r.top - r.height / 2) * strength);
+      };
+      const onLeave = () => { xTo(0); yTo(0); };
+
+      el.addEventListener('mousemove', onMove);
+      el.addEventListener('mouseleave', onLeave);
+      return () => {
+        el.removeEventListener('mousemove', onMove);
+        el.removeEventListener('mouseleave', onLeave);
+      };
+    });
+
+    return () => cleanups.forEach((fn) => fn());
+  }, [selector, strength]);
+}
+
+// Typewriter cycle: types a word, pauses, deletes it, moves to the next.
+// Falls back to the first word, static, under reduced motion.
+function useTypewriterCycle(words, { typeSpeed = 55, deleteSpeed = 30, pause = 1600 } = {}) {
+  const [text, setText] = useState(words[0] || '');
+
+  useEffect(() => {
+    if (words.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setText(words[0] || '');
+      return;
+    }
+
+    let wordIndex = 0;
+    let charIndex = words[0].length;
+    let deleting = false;
+    let timer = null;
+
+    const tick = () => {
+      const word = words[wordIndex];
+      if (!deleting) {
+        charIndex += 1;
+        setText(word.slice(0, charIndex));
+        if (charIndex >= word.length) {
+          deleting = true;
+          timer = setTimeout(tick, pause);
+          return;
+        }
+        timer = setTimeout(tick, typeSpeed);
+      } else {
+        charIndex -= 1;
+        setText(word.slice(0, charIndex));
+        if (charIndex <= 0) {
+          deleting = false;
+          wordIndex = (wordIndex + 1) % words.length;
+          timer = setTimeout(tick, 300);
+          return;
+        }
+        timer = setTimeout(tick, deleteSpeed);
+      }
+    };
+
+    timer = setTimeout(tick, pause);
+    return () => clearTimeout(timer);
+  }, [words, typeSpeed, deleteSpeed, pause]);
+
+  return text;
 }
 
 // Custom Cursor Component
 function CustomCursor() {
   const cursorRef = useRef(null);
-  
+
   useEffect(() => {
     const cursor = cursorRef.current;
-    
-    // Initially hide the cursor until mouse movement
     cursor.style.opacity = "0";
-    
+
     const moveCursor = (e) => {
-      // Show the cursor once movement is detected
       cursor.style.opacity = "1";
       cursor.style.left = `${e.clientX}px`;
       cursor.style.top = `${e.clientY}px`;
     };
-    
-    const growCursor = () => {
-      cursor.classList.add('cursor-grow');
-    };
-    
-    const shrinkCursor = () => {
-      cursor.classList.remove('cursor-grow');
-    };
-    
+
+    const growCursor = () => cursor.classList.add('cursor-grow');
+    const shrinkCursor = () => cursor.classList.remove('cursor-grow');
+
     document.addEventListener('mousemove', moveCursor);
-    
+
     const links = document.querySelectorAll('a, button, .project-card, .skill-badge');
     links.forEach(link => {
       link.addEventListener('mouseenter', growCursor);
       link.addEventListener('mouseleave', shrinkCursor);
     });
-    
+
     return () => {
       document.removeEventListener('mousemove', moveCursor);
       links.forEach(link => {
@@ -198,7 +246,7 @@ function CustomCursor() {
       });
     };
   }, []);
-  
+
   return <div ref={cursorRef} id="cursor"></div>;
 }
 
@@ -207,101 +255,140 @@ function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
-        <a href="https://github.com/Ferrin-Y" target="_blank" rel="noopener noreferrer" className="logo">
-          <i className="fab fa-github"></i>Ferrin-Y
+        <a href="#hero" className="logo">
+          <svg className="logo-mark" width="22" height="22" viewBox="0 0 512 512" aria-hidden="true">
+            <rect width="512" height="512" rx="112" fill="#0D1117" />
+            <text x="256" y="312" textAnchor="middle" fontFamily="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fontSize="160" fontWeight="700">
+              <tspan fill="#8B7CFF">{'{'}</tspan><tspan fill="#E6EDF3">fy</tspan><tspan fill="#8B7CFF">{'}'}</tspan>
+            </text>
+          </svg>
+          ferrin.y
         </a>
-        
+
         <div className="menu-toggle" onClick={toggleMobileMenu}>
           <span></span>
           <span></span>
           <span></span>
         </div>
-        
+
         <ul className={`navbar-links ${mobileMenuOpen ? 'active' : ''}`}>
           <li><a href="#about" onClick={() => setMobileMenuOpen(false)}>About</a></li>
           <li><a href="#projects" onClick={() => setMobileMenuOpen(false)}>Projects</a></li>
           <li><a href="#contact" onClick={() => setMobileMenuOpen(false)}>Contact</a></li>
+          <li><a href="https://github.com/Ferrin-Y" target="_blank" rel="noopener noreferrer" className="btn btn-ghost navbar-cta">GitHub</a></li>
         </ul>
       </div>
     </nav>
   );
 }
 
+const ROLE_WORDS = ["CS Student", "Builder", "Problem Solver", "Lifelong Learner"];
+
 // Hero Section
 function Hero() {
-  // Typewriter effect for the title
-  const [displayText, setDisplayText] = useState("");
-  const fullText = "Hi, I'm Ferrin Yesudasan";
-  const [index, setIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [typingSpeed, setTypingSpeed] = useState(150);
+  const role = useTypewriterCycle(ROLE_WORDS);
+  const pillRef = useRef(null);
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const actionsRef = useRef(null);
+  const panelRef = useRef(null);
+  const sceneRef = useRef(null);
 
   useEffect(() => {
-    const type = () => {
-      // Current text
-      const current = fullText.substring(0, index);
-      setDisplayText(current);
-      
-      // If completing
-      if (!isDeleting && index === fullText.length) {
-        setTimeout(() => setIsDeleting(true), 1500);
-        return;
-      } 
-      
-      // If deleting
-      if (isDeleting && index === 0) {
-        setIsDeleting(false);
-        setTimeout(() => {}, 500);
-        return;
-      }
-      
-      // Speed settings
-      const speed = isDeleting ? 75 : typingSpeed;
-      
-      // Next timeout
-      const timeout = setTimeout(() => {
-        setIndex(prevIndex => isDeleting ? prevIndex - 1 : prevIndex + 1);
-      }, speed);
-      
-      return () => clearTimeout(timeout);
-    };
-    
-    type();
-  }, [index, isDeleting, fullText, typingSpeed]);
+    const targets = [pillRef, titleRef, subtitleRef, actionsRef, panelRef, sceneRef]
+      .map((r) => r.current)
+      .filter(Boolean);
+
+    if (!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const gsap = window.gsap;
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    tl.fromTo(pillRef.current, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.55 })
+      .fromTo(titleRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, '-=0.35')
+      .fromTo(subtitleRef.current, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.45')
+      .fromTo(actionsRef.current, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.55 }, '-=0.4')
+      .fromTo(panelRef.current, { opacity: 0, y: 26, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.8 }, '-=0.5')
+      .fromTo(sceneRef.current, { opacity: 0 }, { opacity: 1, duration: 1.2 }, '-=0.9');
+
+    return () => tl.kill();
+  }, []);
 
   return (
     <section className="hero" id="hero">
-      <ParticleBackground />
-      <div className="hero-content">
-        <h1 className="title" data-text={displayText}>{displayText}</h1>
-        <p className="subtitle">
-          I'm a Computer Science student with a strong foundation in software and web development,
-          coupled with experience in testing and quality assurance.
-        </p>
-        <a href="#projects" className="button">View My Work</a>
+      <HeroBackdrop />
+      <div className="hero-scene-wrap" ref={sceneRef}>
+        <HeroScene />
       </div>
-      <div className="scroll-down">
-        <a href="#about">
+      <div className="hero-container">
+        <div className="hero-copy">
+          <div className="status-pill" ref={pillRef}>
+            <span className="status-dot"></span>
+            open to new opportunities
+          </div>
+
+          <h1 className="title" ref={titleRef}>
+            <span className="line-muted">Computer science student</span>
+            <span className="line-bold">who builds software that holds up.</span>
+          </h1>
+
+          <p className="subtitle" ref={subtitleRef}>
+            I care about clarity and structure, writing code that's reliable now
+            and easy to extend later.
+          </p>
+
+          <div className="hero-actions" ref={actionsRef}>
+            <a href="#projects" className="btn btn-primary">View projects</a>
+            <a href="#contact" className="btn btn-ghost">Get in touch</a>
+          </div>
+        </div>
+
+        <div className="terminal-panel" ref={panelRef}>
+          <div className="terminal-header">
+            <span className="terminal-dot"></span>
+            <span className="terminal-dot"></span>
+            <span className="terminal-dot"></span>
+            <span className="terminal-title">profile.json</span>
+          </div>
+          <div className="terminal-body">
+            <div><span className="prompt">$</span> <span className="command">cat profile.json</span></div>
+            <div className="terminal-json">{`{
+  "name": `}<span className="str">"Ferrin Yesudasan"</span>{`,
+  "role": `}<span className="str">{`"${role}"`}</span>{`,
+  "stack": [`}<span className="str">"React"</span>{`, `}<span className="str">"Java"</span>{`, `}<span className="str">"Python"</span>{`],
+  "location": `}<span className="str">"Hamilton, ON"</span>{`,
+  "status": `}<span className="str">"open_to_work"</span>{`
+}`}<span className="terminal-cursor"></span></div>
+          </div>
+
+          <div className="build-tag">
+            <span className="status-dot"></span>
+            rebuilt · 2026
+          </div>
+        </div>
+      </div>
+
+      <div className="hero-bottom-bar">
+        <span className="hero-bottom-tag">FY / PORTFOLIO</span>
+        <a href="#about" className="scroll-cue">
           <i className="fas fa-chevron-down"></i>
+          scroll to explore
+        </a>
+        <a href="mailto:ferrin.yesudasan@gmail.com" className="say-hi">
+          say hi
+          <i className="fas fa-arrow-up-right-from-square"></i>
         </a>
       </div>
     </section>
@@ -311,125 +398,42 @@ function Hero() {
 // Skills Modal Component
 function SkillsModal({ isOpen, onClose }) {
   const skillCategories = {
-  "Programming Languages": [
-    "Java",
-    "Python",
-    "JavaScript",
-    "TypeScript",
-    "C++",
-    "C#",
-    "PHP",
-  ],
-  "Frontend Development": [
-    "HTML5",
-    "CSS3",
-    "React",
-    "Next.js",
-    "Angular",
-    "jQuery",
-    "JavaFX",
+    "Programming Languages": ["Java", "Python", "JavaScript", "TypeScript", "C++", "C#", "PHP"],
+    "Frontend Development": ["HTML5", "CSS3", "React", "Next.js", "Angular", "jQuery", "JavaFX"],
+    "Backend & API Development": ["Node.js", "Express", "Spring Boot", ".NET Core", "Flask", "RESTful APIs"],
+    "Database Technologies": ["SQL", "Hibernate"],
+    "DevOps & Cloud Tools": ["Git", "Docker", "AWS", "CI/CD"],
+    "Development Tools & Environments": ["VS Code", "Visual Studio", "IntelliJ IDEA", "Eclipse", "Linux", "WordPress"],
+    "Data Science & Visualization": ["pandas", "NumPy", "Matplotlib", "Data Analysis"],
+    "Game & Interactive Media": ["Unity", "Blender3D", "Game Design", "3D Modeling"],
+    "Software Engineering & Methodologies": ["UI/UX Design", "System Analysis & Design", "Agile Methodologies", "SDLC", "Quality Assurance"],
+    "IT Support & Operations": ["Troubleshooting", "Hardware Imaging", "Customer Support", "Technical Support"],
+    "Application Suites": ["Microsoft Office", "Micrsoft Enterprise", "Adobe Creative Cloud"],
+    "Soft Skills": ["Problem Solving", "Team Collaboration", "Communication", "Adaptability", "Project Management", "Leadership", "Time Management"]
+  };
 
-  ],
-  "Backend & API Development": [
-    "Node.js",
-    "Express",
-    "Spring Boot",
-    ".NET Core",
-    "Flask",
-    "RESTful APIs"
-  ],
-  "Database Technologies": [
-    "SQL",
-    "Hibernate"
-  ],
-  "DevOps & Cloud Tools": [
-    "Git",
-    "Docker",
-    "AWS",
-    "CI/CD"
-  ],
-  "Development Tools & Environments": [
-    "VS Code",
-    "Visual Studio",
-    "IntelliJ IDEA",
-    "Eclipse",
-    "Linux",
-    "WordPress"
-  ],
-  "Data Science & Visualization": [
-    "pandas",
-    "NumPy",
-    "Matplotlib",
-    "Data Analysis"
-  ],
-  "Game & Interactive Media": [
-    "Unity",
-    "Blender3D",
-    "Game Design",
-    "3D Modeling"
-  ],
-  "Software Engineering & Methodologies": [
-    "UI/UX Design",
-    "System Analysis & Design",
-    "Agile Methodologies",
-    "SDLC",
-    "Quality Assurance",
-  ],
-  "IT Support & Operations": [
-    "Troubleshooting",
-    "Hardware Imaging",
-    "Customer Support",
-    "Technical Support"
-  ],
-  "Application Suites": [
-    "Microsoft Office",
-    "Micrsoft Enterprise",
-    "Adobe Creative Cloud"
-  ],
-  "Soft Skills": [
-    "Problem Solving",
-    "Team Collaboration",
-    "Communication",
-    "Adaptability",
-    "Project Management",
-    "Leadership",
-    "Time Management"
-  ]
-};
-
-  // Prevent background scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      // Store current scroll position
       const scrollY = window.scrollY;
-      
-      // Prevent background scroll
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
-      
+
       return () => {
-        // Restore background scroll
         document.body.style.overflow = '';
         document.body.style.position = '';
         document.body.style.top = '';
         document.body.style.width = '';
-        
-        // Restore scroll position
         window.scrollTo(0, scrollY);
       };
     }
   }, [isOpen]);
 
-  // Handle escape key
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
+      if (e.key === 'Escape' && isOpen) onClose();
     };
-
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
@@ -439,86 +443,19 @@ function SkillsModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="modal-overlay" 
-      onClick={onClose}
-      style={{
-        // Ensure modal is properly positioned and prevents interaction with background
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 9998,
-        background: 'rgba(0, 0, 0, 0.8)',
-        backdropFilter: 'blur(5px)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflowY: 'auto', // Allow scrolling if modal is taller than viewport
-        padding: '20px'
-      }}
-    >
-      <div 
-        className="modal-content" 
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: 'linear-gradient(135deg, rgb(19, 19, 47) 0%, #1a1a3a 100%)',
-          borderRadius: '20px',
-          maxWidth: '700px',
-          width: '90%',
-          maxHeight: 'calc(100vh - 40px)', // Ensure modal fits in viewport
-          overflow: 'hidden',
-          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
-          border: '1px solid rgba(156, 138, 247, 0.3)',
-          position: 'relative'
-        }}
-      >
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Technical Skills</h2>
-          <button 
-            className="modal-close" 
-            onClick={onClose}
-            aria-label="Close modal"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#f0f2ff',
-              fontSize: '2em',
-              cursor: 'pointer',
-              padding: 0,
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%',
-              transition: 'background-color 0.3s ease'
-            }}
-          >
-            ×
-          </button>
+          <button className="modal-close" onClick={onClose} aria-label="Close modal">×</button>
         </div>
-        <div 
-          className="modal-body"
-          style={{
-            padding: '30px',
-            overflowY: 'auto',
-            maxHeight: 'calc(100vh - 160px)', // Account for header height
-            // Smooth scrolling
-            scrollBehavior: 'smooth',
-            transform: 'translate3d(0, 0, 0)',
-            willChange: 'scroll-position'
-          }}
-        >
+        <div className="modal-body">
           {Object.entries(skillCategories).map(([category, skills]) => (
             <div key={category} className="skill-category">
               <h3>{category}</h3>
               <div className="skill-tags">
                 {skills.map((skill, index) => (
-                  <span key={index} className="skill-tag-modal">
-                    {skill}
-                  </span>
+                  <span key={index} className="skill-tag-modal">{skill}</span>
                 ))}
               </div>
             </div>
@@ -531,75 +468,64 @@ function SkillsModal({ isOpen, onClose }) {
 
 // About Section with Modal
 function About() {
-  const [ref, isVisible] = useIntersectionObserver({
-    threshold: 0.2,
-    triggerOnce: true
-  });
-
+  const [ref, isVisible] = useIntersectionObserver({ threshold: 0.2, triggerOnce: true });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Condensed skills for main view
-  const mainSkills = [
-    "JavaScript", "React", "Java", "Node.js", 
-    "Spring Boot", "C#", "SQL", "Git", "CI/CD"
+  const specs = [
+    { label: "FOCUS", value: "Full-stack apps & backend systems" },
+    { label: "STACK", value: "JS/TS, Java, Python, C#" },
+    { label: "BASED IN", value: "Hamilton, Ontario" },
+    { label: "STATUS", value: "Open to opportunities" }
   ];
 
   return (
     <>
       <section className="about" id="about">
-        <div className="about-container">
-          <h2 className="section-title">About Me</h2>
-          
-          <div 
-            className="about-content" 
+        <div className="container">
+          <div className="eyebrow"><span className="chevron">▸</span> ABOUT</div>
+          <h2 className="section-heading">A little about me</h2>
+
+          <div
+            className="about-grid"
             ref={ref}
             style={{
               opacity: isVisible ? 1 : 0,
-              transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+              transform: isVisible ? 'translateY(0)' : 'translateY(24px)',
               transition: 'opacity 0.6s ease, transform 0.6s ease'
             }}
           >
-            <div className="about-image">
-              <img src="images/profile.jpg" alt="Ferrin Yesudasan" />
-            </div>
-            
             <div className="about-text">
-              <p> 
-                I'm a software developer who values clarity, structure, and purpose in every line of code. 
-                I stay current with modern tools and frameworks, but my focus goes deeper. 
-                I care about understanding how things work, breaking down concepts, and using that insight to build software that is not just functional, but reliable, thoughtful, and well-crafted. 
-              </p> 
-              <p> 
-                For me, good software means more than just working. It should be maintainable, efficient, and intuitive. 
-                I approach development with care and discipline, whether I'm debugging complex issues or designing features from the ground up. 
-                I believe in learning continuously, not just to follow trends but to improve the way I think, build, and contribute.
-              </p> 
-              
               <p>
-                My goal is to create software that is both useful and meaningful, something that solves real problems, is easy to work with, and feels solid from the inside out. 
-              </p>              
-              <div className="skill-list">
-                {mainSkills.map((skill, index) => (
-                  <span key={index} className="skill-badge">
-                    {skill}
-                  </span>
-                ))}
-                <button 
-                  className="skill-badge view-all-skills"
-                  onClick={() => setIsModalOpen(true)}
-                >
-                  View All Skills +
+                I'm a software developer who values <strong>clarity and structure</strong>.
+                I like understanding how things actually work before I build on top of
+                them, and I'd rather ship something smaller and solid than something
+                large and shaky.
+              </p>
+              <p>
+                Most of what's below came from wanting to learn something specific,
+                like async pipelines, AI integrations, or dependency graphs, and then
+                building the smallest real version of it I could.
+              </p>
+              <div className="about-cta">
+                <button className="btn btn-ghost view-all-skills" onClick={() => setIsModalOpen(true)}>
+                  View full stack ▸
                 </button>
               </div>
+            </div>
+
+            <div className="spec-panel">
+              {specs.map((spec) => (
+                <div className="spec-row" key={spec.label}>
+                  <span className="spec-label">{spec.label}</span>
+                  <span className="spec-value">{spec.value}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
-      
-      <SkillsModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
+
+      <SkillsModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
 }
@@ -608,34 +534,36 @@ function About() {
 function Projects() {
   const projects = [
     {
-      title: "Conduit - Async RAG Pipeline",
+      title: "Conduit",
+      eyebrow: "Backend · RAG pipeline",
       description: "A high-performance, asynchronous document ingestion and semantic search engine. FastAPI accepts documents instantly while a background worker pool handles chunking, embedding, and indexing for retrieval.",
       url: "https://github.com/Ferrin-Y/Conduit",
       icon: "fa-diagram-project",
-      gradient: "linear-gradient(135deg, rgba(118,94,222,0.55), rgba(42,20,86,0.85))",
       tags: ["Python", "FastAPI", "PostgreSQL", "ChromaDB", "Docker"],
-      badge: "New"
+      isNew: true,
+      featured: true
     },
     {
-      title: "Glean - AI Bookmark Manager",
+      title: "Glean",
+      eyebrow: "Full-stack · AI",
       description: "An AI-powered bookmark manager that auto-tags, summarizes, and organizes saved links, with full-text search and collections built on Next.js and Supabase.",
       url: "https://github.com/Ferrin-Y/glean",
       icon: "fa-bookmark",
-      gradient: "linear-gradient(135deg, rgba(79,60,166,0.6), rgba(19,19,47,0.9))",
       tags: ["Next.js", "TypeScript", "Supabase", "Tailwind CSS"],
-      badge: "New"
+      isNew: true
     },
     {
-      title: "Arboris - Dependency Graph CLI",
+      title: "Arboris",
+      eyebrow: "CLI tool",
       description: "A fast command-line tool that parses source with tree-sitter and maps what imports what across large repos, exporting the result as Markdown, Mermaid, Graphviz, or an interactive terminal explorer.",
       url: "https://github.com/Ferrin-Y/Arboris",
       icon: "fa-sitemap",
-      gradient: "linear-gradient(135deg, rgba(118,94,222,0.5), rgba(19,19,47,0.9))",
-      tags: ["Python", "Rust", "tree-sitter", "CLI"],
-      badge: "New"
+      tags: ["Python", "Rust", "tree-sitter"],
+      isNew: true
     },
     {
       title: "Space Shooter Game",
+      eyebrow: "Game",
       description: "A space-shooter game made using JavaScript and SVG with smooth animations and interactive controls.",
       url: "https://ferrin-y.github.io/Space-Shooter/",
       image: "images/screenshots/space-shooter.png",
@@ -643,13 +571,15 @@ function Projects() {
     },
     {
       title: "Color Matching Game",
+      eyebrow: "Full-stack · Game",
       description: "A full-stack color-matching game, built with HTML, CSS, JavaScript, and powered by a Node.js & Express backend.",
       url: "https://ferrin-y.github.io/Color-Match/",
       image: "images/screenshots/color-matcher.png",
-      tags: ["JavaScript", "Node.js", "Express","SVG"]
-    },    
+      tags: ["JavaScript", "Node.js", "Express", "SVG"]
+    },
     {
       title: "MoInfo Study Group App",
+      eyebrow: "Web app",
       description: "A web application to help students create and find study groups for better collaborative learning.",
       url: "https://github.com/Musa-Kal/MoInfo",
       image: "images/screenshots/mo-info.png",
@@ -657,6 +587,7 @@ function Projects() {
     },
     {
       title: "Mooove - 3D Runner Game",
+      eyebrow: "Game · Unity",
       description: "A Unity-based endless rolling game with dynamic obstacles and scoring system, hosted on itch.io.",
       url: "https://ferrin-y.itch.io/mooove",
       image: "images/screenshots/mooove.png",
@@ -664,67 +595,146 @@ function Projects() {
     },
     {
       title: "CookApp - Recipe Suggestion App",
-      description: "A Java based application that helps users discover, favorite recipes based on ingredients, dietary preferences, and cuisine",
+      eyebrow: "Desktop app",
+      description: "A Java based application that helps users discover and favorite recipes based on ingredients, dietary preferences, and cuisine.",
       url: "https://github.com/Ferrin-Y/CookApp",
       image: "images/screenshots/cookApp.png",
       tags: ["Java", "JavaFX", "MySQL", "Hibernate"]
     },
     {
       title: "Book Discovery Expo App",
-      description: "A React Native mobile application that allows users to search, browse, and save their favorite books using the Google Books API",
+      eyebrow: "Mobile",
+      description: "A React Native mobile application that allows users to search, browse, and save their favorite books using the Google Books API.",
       url: "https://github.com/Ferrin-Y/google-books-app",
-      image: "images/screenshots/google-books.png", 
+      image: "images/screenshots/google-books.png",
       tags: ["React Native", "Expo", "Google Books API"]
     }
   ];
 
-  // Using Intersection Observer for scroll animations
-  const [ref, isVisible] = useIntersectionObserver({
-    threshold: 0.1,
-    triggerOnce: true
-  });
+  const trackRef = useRef(null);
+  const fillRef = useRef(null);
+  const [hoverScroll, setHoverScroll] = useState(false);
+
+  useEffect(() => {
+    const pointerQuery = window.matchMedia('(pointer: fine)');
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setHoverScroll(pointerQuery.matches && !motionQuery.matches);
+    update();
+    pointerQuery.addEventListener('change', update);
+    motionQuery.addEventListener('change', update);
+    return () => {
+      pointerQuery.removeEventListener('change', update);
+      motionQuery.removeEventListener('change', update);
+    };
+  }, []);
+
+  // Progress fill tracks the rail's scroll position regardless of input method
+  // (wheel redirect below, native trackpad swipe, touch, or dragging the scrollbar).
+  useEffect(() => {
+    const track = trackRef.current;
+    const viewport = track && track.parentElement;
+    if (!viewport) return;
+
+    const onScroll = () => {
+      const max = track.scrollWidth - viewport.clientWidth;
+      if (fillRef.current) fillRef.current.style.width = `${max > 0 ? (viewport.scrollLeft / max) * 100 : 0}%`;
+    };
+
+    viewport.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => viewport.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // While the cursor is over the rail, redirect vertical wheel input into horizontal
+  // scroll — but only while there's more rail left to cover. At either end, or with
+  // the cursor anywhere else on the page, the page just scrolls normally.
+  useEffect(() => {
+    if (!hoverScroll) return;
+    const track = trackRef.current;
+    const viewport = track && track.parentElement;
+    if (!viewport) return;
+
+    let target = viewport.scrollLeft;
+    let raf = null;
+
+    const settle = () => {
+      const current = viewport.scrollLeft;
+      const next = current + (target - current) * 0.18;
+      if (Math.abs(target - next) > 0.5) {
+        viewport.scrollLeft = next;
+        raf = requestAnimationFrame(settle);
+      } else {
+        viewport.scrollLeft = target;
+        raf = null;
+      }
+    };
+
+    const onWheel = (e) => {
+      if (raf === null) target = viewport.scrollLeft;
+      const max = track.scrollWidth - viewport.clientWidth;
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+
+      if ((delta > 0 && target >= max - 1) || (delta < 0 && target <= 1)) {
+        return; // already at an edge in this direction — let the page scroll instead
+      }
+
+      e.preventDefault();
+      target = Math.min(max, Math.max(0, target + delta));
+      if (raf === null) raf = requestAnimationFrame(settle);
+    };
+
+    viewport.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      viewport.removeEventListener('wheel', onWheel);
+      if (raf !== null) cancelAnimationFrame(raf);
+    };
+  }, [hoverScroll]);
 
   return (
-    <section className="projects" id="projects">
-      <div className="projects-container">
-        <h2 className="section-title">My Projects</h2>
-        
-        <div 
-          className="project-list" 
-          ref={ref}
-          style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-            transition: 'opacity 0.6s ease, transform 0.6s ease'
-          }}
-        >
-          {projects.map((project, index) => (
-            <a
-              key={index}
-              className="project-card"
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                "--bg-image": project.image ? `url(${project.image})` : project.gradient,
-                transitionDelay: `${index * 0.1}s`
-              }}
-            >
-              {project.badge && <span className="project-badge">{project.badge}</span>}
-              {!project.image && project.icon && (
-                <i className={`fas ${project.icon} project-glyph`}></i>
-              )}
-              <div className="project-content">
+    <section className="projects-scroll-wrap" id="projects">
+      <div className="projects-sticky">
+        <div className="projects-intro">
+          <div className="eyebrow"><span className="chevron">▸</span> PROJECTS</div>
+          <h2 className="section-heading">Selected work</h2>
+          <p className="section-sub" style={{ marginBottom: 0 }}>
+            Things I've built, from async AI pipelines to small games{hoverScroll ? ". Scroll over the rail to move through them" : ""}.
+          </p>
+          <div className="project-progress">
+            <div className="project-progress-fill" ref={fillRef}></div>
+          </div>
+        </div>
+
+        <div className="project-track-viewport">
+          <div className="project-track" ref={trackRef}>
+            {projects.map((project, index) => (
+              <a
+                key={index}
+                className={`project-card ${project.featured ? 'featured' : ''}`}
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className={`project-media ${!project.image ? 'icon-tile' : ''}`}>
+                  {project.image ? (
+                    <img src={project.image} alt={project.title} loading="lazy" />
+                  ) : (
+                    <i className={`fas ${project.icon}`}></i>
+                  )}
+                </div>
+
+                <div className="project-top">
+                  <span className="project-eyebrow">
+                    {project.eyebrow}{project.isNew && <span className="new-tag"> · new</span>}
+                  </span>
+                  <i className="fas fa-arrow-up-right-from-square project-link-icon"></i>
+                </div>
+
                 <h3>{project.title}</h3>
                 <div className="project-description">{project.description}</div>
-                <div className="project-tags">
-                  {project.tags.map((tag, i) => (
-                    <span key={i} className="project-tag">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            </a>
-          ))}
+                <div className="project-tags">{project.tags.join(" · ")}</div>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -734,100 +744,83 @@ function Projects() {
 // Footer Section
 function Footer() {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="footer" id="contact">
-      <div className="footer-container">
-        <div className="footer-col">
-          <h3>About Me</h3>
-          <p>Computer Science student passionate about creating innovative software solutions and web applications.</p>
-          <div className="social-links">
-            <a href="https://github.com/Ferrin-Y" className="social-link" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-github"></i>
-            </a>
-            <a href="https://www.linkedin.com/in/ferrin-yesudasan" className="social-link" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-linkedin-in"></i>
-            </a>
+      <div className="container">
+        <div className="eyebrow"><span className="chevron">▸</span> CONTACT</div>
+        <h2 className="section-heading">Get in touch</h2>
+        <p className="section-sub" style={{ marginBottom: '56px' }}>
+          Have a project, an opening, or just want to talk shop? My inbox is open.
+        </p>
+
+        <div className="footer-container">
+          <div className="footer-col">
+            <h3>Ferrin Yesudasan</h3>
+            <p className="footer-tagline">
+              Computer Science student building full-stack apps, AI-powered tools, and games.
+            </p>
+            <div className="social-links">
+              <a href="https://github.com/Ferrin-Y" className="social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                <i className="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ferrin-yesudasan" className="social-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                <i className="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+
+          <div className="footer-col">
+            <h3>Navigate</h3>
+            <ul className="footer-links">
+              <li><a href="#hero">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#projects">Projects</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h3>Elsewhere</h3>
+            <div className="contact-info">
+              <a href="mailto:ferrin.yesudasan@gmail.com">ferrin.yesudasan@gmail.com</a>
+              <a href="https://www.linkedin.com/in/ferrin-yesudasan" target="_blank" rel="noopener noreferrer">LinkedIn / Ferrin-Yesudasan</a>
+              <a href="https://github.com/Ferrin-Y" target="_blank" rel="noopener noreferrer">github.com/Ferrin-Y</a>
+              <span>Hamilton, Ontario, Canada</span>
+            </div>
           </div>
         </div>
-        
-        <div className="footer-col">
-          <h3>Quick Links</h3>
-          <ul className="footer-links">
-            <li><a href="#hero"><i className="fas fa-home"></i> Home</a></li>
-            <li><a href="#about"><i className="fas fa-user"></i> About</a></li>
-            <li><a href="#projects"><i className="fas fa-code"></i> Projects</a></li>
-            <li><a href="#contact"><i className="fas fa-address-book"></i> Contact</a></li>
-          </ul>
+
+        <div className="copyright">
+          <span>© {currentYear} Ferrin Yesudasan</span>
+          <span>Built with React</span>
         </div>
-        
-        <div className="footer-col">
-          <h3>Contact Info</h3>
-          <div className="contact-info">
-            <p><a href="mailto:ferrin.yesudasan@gmail.com"><i className="fas fa-envelope"></i> ferrin.yesudasan@gmail.com</a></p>
-            <p><a href="https://www.linkedin.com/in/ferrin-yesudasan" target="_blank" rel="noopener noreferrer"><i className="fab fa-linkedin"></i>Linkedin/Ferrin-Yesudasan</a></p>
-            <p><a href="https://github.com/Ferrin-Y"><i className="fab fa-github"></i> github.com/Ferrin-Y</a></p>
-            <p><i className="fas fa-map-marker-alt"></i>Hamilton, Ontario, Canada</p>
-          </div>
-        </div>
-      </div>
-      
-      <div className="copyright">
-        <p>&copy; {currentYear} Ferrin Yesudasan. All Rights Reserved.</p>
-        <p className="tech-stack">Built with React</p>
       </div>
     </footer>
   );
 }
 
-// Animation for scroll to top button
+// Scroll to top button
 function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
-  
+
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-    
+    const toggleVisibility = () => setIsVisible(window.pageYOffset > 300);
     window.addEventListener('scroll', toggleVisibility);
     return () => window.removeEventListener('scroll', toggleVisibility);
   }, []);
-  
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-  
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
   return (
-    <button 
-      className="scroll-to-top" 
+    <button
+      className="scroll-to-top"
       onClick={scrollToTop}
+      aria-label="Scroll to top"
       style={{
-        position: 'fixed',
-        bottom: '30px',
-        right: '30px',
-        backgroundColor: 'rgb(var(--accent-color))',
-        color: 'white',
-        border: 'none',
-        borderRadius: '50%',
-        width: '50px',
-        height: '50px',
-        fontSize: '20px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        cursor: 'pointer',
         opacity: isVisible ? '1' : '0',
-        transition: 'opacity 0.3s, transform 0.3s',
-        transform: isVisible ? 'scale(1)' : 'scale(0.8)',
-        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)',
-        zIndex: 999
+        pointerEvents: isVisible ? 'auto' : 'none',
+        transform: isVisible ? 'scale(1)' : 'scale(0.85)'
       }}
     >
       <i className="fas fa-arrow-up"></i>
@@ -837,32 +830,7 @@ function ScrollToTop() {
 
 // Main App Component
 function App() {
-  // Initialize animations when the app loads
-  useEffect(() => {
-    // Add scroll event listener to track scroll position
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      
-      // Get all animatable elements
-      const animatableElements = document.querySelectorAll('.section-title, .about-content, .project-card');
-      
-      animatableElements.forEach(element => {
-        const elementPosition = element.getBoundingClientRect().top + scrollPosition;
-        const offset = elementPosition - scrollPosition;
-        
-        if (offset < windowHeight * 0.8) {
-          element.classList.add('animate');
-        }
-      });
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    // Initial check for elements in view
-    handleScroll();
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  useMagnetic('.btn, .social-link', 0.25);
 
   return (
     <>
